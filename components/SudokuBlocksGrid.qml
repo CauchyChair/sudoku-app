@@ -3,6 +3,11 @@ import Ubuntu.Components 1.3
 import Ubuntu.Components.Popups 1.3
 import "../js/SudokuCU.js" as SudokuCU
 import QtFeedback 5.0
+import QtQuick.Layouts 1.1
+import QtQuick.Controls 1.4
+import QtQuick.Extras 1.4
+import QtQuick.Controls.Styles 1.4
+
 
 Column {
     id: mainRectangle;
@@ -320,15 +325,274 @@ Column {
             //  spacing: units.dp(1);
 
 
-            Component {
+            Item {
                 id: dialog
-
-                Dialog {
+                PieMenu {
                     id: dialogue
-                    objectName: "picknumberscreen"
-                    //title: "Number Picker"
-                    text: i18n.tr("Please pick a number")
+                    boundingItem: null
 
+                    z: 3
+
+
+                    Keys.onPressed: {
+                        //print("Pressed: ",event.key)
+                        if (event.key-48 >= 1 && event.key-48 <= 9) {
+                            pressButton(event.key-48)
+                        }
+                        else if (event.key === Qt.Key_Escape) {
+                            buttonsGrid.redrawGrid()
+                        }
+                        else if (event.key == Qt.Key_C) {
+                            numberOfActions++;
+                            buttonsGrid.itemAt(currentX).buttonText = "";
+                            var row = Math.floor(currentX/9);
+                            var column = currentX%9;
+                            //print (row, column);
+                            grid.setValue(column,row, 0);
+                            buttonsGrid.itemAt(currentX).buttonColor = defaultColor;
+                            buttonsGrid.itemAt(currentX).boldText = false;
+                            buttonsGrid.itemAt(currentX).hinted = false
+                            buttonsGrid.redrawGrid()
+                        }
+
+
+                    }
+
+                    function pressButton(currentDigit){
+                        buttonsGrid.itemAt(currentX).buttonText = currentDigit
+                        buttonsGrid.itemAt(currentX).hinted = false
+                        numberOfActions++;
+                        if(currentDigit == 0) {buttonsGrid.itemAt(currentX).buttonText = ""}
+
+                        var row = Math.floor(currentX/9);
+                        var column = currentX%9;
+
+                        //print (row, column)
+                        grid.setValue(column, row, currentDigit);
+
+                        buttonsGrid.redrawGrid()
+                        if (checkIfAllFieldsCorrect() == false) {
+                            //console.log("FALSE ENTRY");
+                            incorrectEntry.play();
+                        }
+
+                        mainView.dialogLoaded = -1;
+                        mainView.focus = true;
+
+                        if ( checkIfGameFinished()) {
+                            var _score = sudokuBlocksGrid.calculateScore();
+                            gameFinishedRectangle.visible = true;
+                            //Settings.insertNewScore(currentUserId, sudokuBlocksGrid.calculateScore())
+                            mainView.insertNewGameScore(currentUserId, _score)
+
+                            if (checkIfCheating)
+                            {
+                                gameFinishedText.text = i18n.tr("You are a cheat...\nBut we give you\n%1 point.",
+                                                                "You are a cheat...\nBut we give you\n%1 points.",
+                                                                _score).arg(_score)
+
+                            }
+                            else
+                            {
+                                gameFinishedText.text = i18n.tr("Congratulations!\nWe give you\n%1 point.",
+                                                                "Congratulations!\nWe give you\n%1 points.",
+                                                                _score).arg(_score)
+                            }
+
+                            //print (sudokuBlocksGrid.numberOfActions)
+                            //print (sudokuBlocksGrid.numberOfHints)
+                            //print (sudokuBlocksGrid.gameSeconds)
+                            //print (sudokuBlocksGrid.gameDifficulty)
+                            gamesPlayedMetric.increment(1);
+
+                            winTimer.restart();
+                        }
+                    }
+
+                    //objectName: "picknumberscreen"
+                    //title: "Number Picker"
+                    //text: i18n.tr("Please pick a number")
+                    style: PieMenuStyle {
+                    id: mein_style
+                    startAngle: -100
+                    endAngle: 100
+                    shadowRadius: 0
+
+                    title: Text {
+/*
+                        font.pixelSize: FontUtils.sizeToPixels("large")
+                        font.bold: boldText;
+
+                        buttonsGrid.itemAt(currentX)
+                        text: styleData.text
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        color: "black"
+                        antialiasing: true*/
+                    }
+                    menuItem: Item {
+                      id: actionRootDelegateItem
+                      rotation: -90 + sectionCenterAngle(styleData.index)
+
+                        Canvas {
+                            id: actionCanvas
+                            anchors.fill: parent
+                            property color currentColor: control.currentIndex === styleData.index ? selectionColor : backgroundColor
+
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            /*Connections {
+                                target: pieMenuStyle
+                                onStartAngleChanged: actionCanvas.requestPaint()
+                                onEndAngleChanged: actionCanvas.requestPaint()
+                            }
+
+                            Connections {
+                                target: control
+                                onCurrentIndexChanged: actionCanvas.requestPaint()
+                            }*/
+
+                              onPaint: {
+                                  var ctx = getContext("2d");
+                                  var x = width/2
+                                  var y = height/2
+                                  var section = styleData.index
+                                  var r = radius
+                                  var ringWidth = cancelRadius
+                                  var ringColor = currentColor
+                                  ctx.reset();
+                                  ctx.fillStyle = "gray"//ringColor;
+
+                                  // Draw one section.
+                                  ctx.beginPath();
+                                  ctx.moveTo(x,y);
+
+                                  // Canvas draws 0 degrees at 3 o'clock, whereas we want it to draw it at 12.
+                                  //var start = control.__protectedScope.sectionStartAngle(section);
+                                  //var end = control.__protectedScope.sectionEndAngle(section);
+                                  var start = sectionCenterAngle(styleData.index)/2 -
+                                  ctx.arc(x, y, r, -Math.PI * (1/20), Math.PI * (1/20), false);
+                                  ctx.fill();
+
+                                  // Either change this to the background color, or use the global composition.
+                                  ctx.fillStyle = "black";
+                                  ctx.globalCompositeOperation = "destination-out";
+                                  ctx.beginPath();
+                                  ctx.moveTo(x, y);
+                                  ctx.arc(x, y, ringWidth, 0, Math.PI * 2);
+                                  ctx.closePath();
+                                  ctx.fill();
+
+                                  // If using the global composition method, make sure to change it back to default.
+                                  ctx.globalCompositeOperation = "source-over";
+                              }
+                        }
+                        Item {
+                          //anchors.horizontalCenter: parent.horizontalCenter
+                          //anchors.verticalCenter: parent.verticalCenter
+                          x: parent.height * (7/8)
+                          y: parent.width * (0.4475)
+                          Text {
+                            id: textItem
+                            text: control.menuItems[styleData.index].text
+                            font.pixelSize: FontUtils.sizeToPixels("large")
+                            font.bold: boldText;
+                            //x: parent.height * 2/3
+                            //rotation: sectionCenterAngle(styleData.index)
+                            color: control.currentIndex === styleData.index ? "violet" : "black"
+                            rotation: -item.rotation
+                          }
+                        }
+
+
+                        /*id: item
+                        rotation: -90 + sectionCenterAngle(styleData.index)
+
+                        /*Canvas {
+                        anchors.fill: parent
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        onPaint: {
+                            var ctx = getContext("2d");
+                            ctx.reset();
+
+                            var centreX = width / 2;
+                            var centreY = height / 2;
+                            ctx.beginPath();
+                            ctx.fillStyle = "orange";
+                            ctx.moveTo(centreX, centreY);
+                            ctx.arc(centreX, centreY, width, -Math.PI * (1/20), Math.PI * (1/20), false);
+                            ctx.lineTo(centreX, centreY);
+                            ctx.fill();
+                        }
+                        Item {
+                          //anchors.horizontalCenter: parent.horizontalCenter
+                          //anchors.verticalCenter: parent.verticalCenter
+                          x: parent.height * (7/8)
+                          y: parent.width * (0.4475)
+                          Text {
+                            id: textItem
+                            text: control.menuItems[styleData.index].text
+                            font.pointSize: 13.75
+                            //x: parent.height * 2/3
+                            //rotation: sectionCenterAngle(styleData.index)
+                            color: control.currentIndex === styleData.index ? "violet" : "black"
+                            rotation: -item.rotation
+                          //}
+                        }*/
+                      }
+                    }
+
+
+                    triggerMode: TriggerMode.TriggerOnRelease
+
+                    MenuItem {
+                        text: "1"
+                        onTriggered:dialogue.pressButton(1)
+                    }
+                    MenuItem {
+                        text: "2"
+                        onTriggered:dialogue.pressButton(2)
+                    }
+                    MenuItem {
+                        text: "3"
+                        onTriggered:dialogue.pressButton(3)
+                    }
+                    MenuItem {
+                        text: "4"
+                        onTriggered:dialogue.pressButton(4)
+                    }
+                    MenuItem {
+                        text: "5"
+                        onTriggered:dialogue.pressButton(5)
+                    }
+                    MenuItem {
+                        text: "6"
+                        onTriggered:dialogue.pressButton(6)
+                    }
+                    MenuItem {
+                        text: "7"
+                        onTriggered:dialogue.pressButton(7)
+                    }
+                    MenuItem {
+                        text: "8"
+                        onTriggered:dialogue.pressButton(8)
+                    }
+                    MenuItem {
+                        text: "9"
+                        onTriggered:dialogue.pressButton(9)
+                    }
+                    MenuItem {
+                        text: ""
+                        onTriggered:dialogue.pressButton(0)
+                    }
+                    //x: buttonsGrid.itemAt(currentX).x
+                    //y: buttonsGrid.itemAt(currentX).y
+
+/*
+
+                    //x: buttonsGrid.itemAt(currentX).x
+                    //y: buttonsGrid.itemAt(currentX).y
                     //Column {
                     //    spacing: units.gu(5)
                     //x: -units.gu(1)
@@ -344,7 +608,7 @@ Column {
                         }
                         else if (event.key === Qt.Key_Escape) {
                             buttonsGrid.redrawGrid()
-                            PopupUtils.close(dialogue)
+                            /*dialogue.visible = false*//*PopupUtils.close(dialogue)
                         }
                         else if (event.key == Qt.Key_C) {
                             numberOfActions++;
@@ -357,7 +621,7 @@ Column {
                             buttonsGrid.itemAt(currentX).boldText = false;
                             buttonsGrid.itemAt(currentX).hinted = false
                             buttonsGrid.redrawGrid()
-                            PopupUtils.close(dialogue)
+                            /*dialogue.visible = false*//*PopupUtils.close(dialogue)
                         }
 
 
@@ -375,7 +639,7 @@ Column {
                         grid.setValue(column, row, currentDigit);
 
                         buttonsGrid.redrawGrid()
-                        PopupUtils.close(dialogue)
+                        /*dialogue.visible = false*//*PopupUtils.close(dialogue)
                         if (checkIfAllFieldsCorrect() == false) {
                             //console.log("FALSE ENTRY");
                             incorrectEntry.play();
@@ -407,7 +671,7 @@ Column {
                             buttonsGrid.itemAt(currentX).boldText = false;
                             buttonsGrid.itemAt(currentX).hinted = false
                             buttonsGrid.redrawGrid()
-                            PopupUtils.close(dialogue)
+                            dialogue.visible = false//PopupUtils.close(dialogue)
                             //parent.pressButton(currentX);
                         }
                     }
@@ -448,7 +712,7 @@ Column {
 
                                     buttonsGrid.redrawGrid()
 
-                                    PopupUtils.close(dialogue)
+                                    dialogue.visible = false//PopupUtils.close(dialogue)
 
                                     if ( checkIfGameFinished()) {
                                         var _score = sudokuBlocksGrid.calculateScore();
@@ -496,13 +760,13 @@ Column {
                         //border.color: "transparent"
                         onTriggered: {
                             buttonsGrid.redrawGrid()
-                            PopupUtils.close(dialogue)
+                            dialogue.visible = false //PopupUtils.close(dialogue)
                         }
                     }
-
                     //}
-
+*/
                 }
+              }
             }
 
 
@@ -560,5 +824,3 @@ Column {
             }
         }
     }
-}
-
