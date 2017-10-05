@@ -11,8 +11,8 @@ Item {
     property color defaultTextColor: "white";
     property bool boldText: false;
     property color textColor: UbuntuColors.coolGrey;
-    property color dialogButtonColor1: UbuntuColors.lightAubergine
-    property color dialogButtonColor2: UbuntuColors.orange
+    property color dialogButtonColor1: UbuntuColors.lightAubergine;
+    property color dialogButtonColor2: UbuntuColors.orange;
     property color dialogButtonColor3: "black"
     property color dialogButtonTextColor: "white"
     property color headerColor: "#F5F5F5"
