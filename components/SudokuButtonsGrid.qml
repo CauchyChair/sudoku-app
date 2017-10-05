@@ -101,8 +101,15 @@ Repeater {
                 onRunningChanged: {
                     if (animateButton.running == false ) {
                         mainRectangle.currentX = index;
+                        var currentLeft = buttonsGrid.itemAt(mainRectangle.currentX).x
+                        var currentTop = buttonsGrid.itemAt(mainRectangle.currentX).y
+                        var LeftDelta = (buttonsGrid.itemAt(1).x-buttonsGrid.itemAt(0).x)/2
+                        var TopDelta = (buttonsGrid.itemAt(9).y-buttonsGrid.itemAt(0).y)/2
                         gridButton.buttonColor = defaultColor;
-                        PopupUtils.open(dialog, gridButton);
+                        //dialogue.visible = true
+                        var middleX = currentLeft + LeftDelta
+                        var middleY = currentTop + TopDelta
+                        dialogue.popup(middleX, middleY)
 
                     }
 
@@ -110,13 +117,15 @@ Repeater {
             }
 
             onClicked: {
-                animateButton.start();
+                //animateButton.start();
                 /*mainRectangle.currentX = index;
-                gridButton.buttonColor = defaultColor;
-                PopupUtils.open(dialog, gridButton);*/
+                gridButton.buttonColor = defaultColor;*/
+                //dialogue.visible= true//PopupUtils.open(dialogue, gridButton)*/
+                //dialogue.popup(buttonsGrid.itemAt(currentX).x, buttonsGrid.itemAt(currentX).y)
             }
             onPressed: {
                 gridButton.buttonColor = String(Qt.darker(defaultColor,1.05));
+                animateButton.start();
             }
 
             onCanceled: {
@@ -160,4 +169,3 @@ Repeater {
     }
 
 }
-
