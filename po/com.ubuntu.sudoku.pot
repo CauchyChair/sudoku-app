@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sudoku-app\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-02-28 22:53+0530\n"
+"POT-Creation-Date: 2017-10-09 10:29+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -68,8 +68,7 @@ msgstr ""
 
 #: ../components/AddProfileDialog.qml:85
 #: ../components/ManageProfileDialog.qml:127 ../components/SettingsTab.qml:66
-#: ../components/SettingsTab.qml:116 ../components/SudokuBlocksGrid.qml:488
-#: ../sudoku-app.qml:343
+#: ../components/SettingsTab.qml:116 ../sudoku-app.qml:343
 msgid "Cancel"
 msgstr ""
 
@@ -181,15 +180,7 @@ msgstr ""
 msgid "Manage profiles"
 msgstr ""
 
-#: ../components/SudokuBlocksGrid.qml:330
-msgid "Please pick a number"
-msgstr ""
-
-#: ../components/SudokuBlocksGrid.qml:391
-msgid "Clear"
-msgstr ""
-
-#: ../components/SudokuBlocksGrid.qml:461
+#: ../components/SudokuBlocksGrid.qml:390
 #, qt-format
 msgid ""
 "You are a cheat...\n"
@@ -202,7 +193,7 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../components/SudokuBlocksGrid.qml:468
+#: ../components/SudokuBlocksGrid.qml:397
 #, qt-format
 msgid ""
 "Congratulations!\n"
