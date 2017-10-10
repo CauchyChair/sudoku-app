@@ -414,23 +414,25 @@ Column {
                     //text: i18n.tr("Please pick a number")
                     style: PieMenuStyle {
                     id: mein_style
-                    startAngle: -100
-                    endAngle: 100
+                    startAngle: (currentX%9<=4)? -10:170//-10//-100
+                    endAngle: (currentX%9<=4)? 190:370//190//100
                     shadowRadius: 0
 
                     title: Text {
-/*
+                        y:121
+                        x:-1
                         font.pixelSize: FontUtils.sizeToPixels("large")
                         font.bold: boldText;
 
-                        buttonsGrid.itemAt(currentX)
+                        //buttonsGrid.itemAt(currentX)
                         text: styleData.text
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         color: "black"
-                        antialiasing: true*/
+                        antialiasing: true
                     }
                     menuItem: Item {
+                      z: 4
                       id: actionRootDelegateItem
                       rotation: -90 + sectionCenterAngle(styleData.index)
 
@@ -441,16 +443,17 @@ Column {
 
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
-                            /*Connections {
-                                target: pieMenuStyle
-                                onStartAngleChanged: actionCanvas.requestPaint()
-                                onEndAngleChanged: actionCanvas.requestPaint()
+                            /*
+                            MouseArea {
+                              id: overMenuArea
+                              anchors.fill: parent
+                              hoverEnabled: true
                             }
-
-                            Connections {
-                                target: control
-                                onCurrentIndexChanged: actionCanvas.requestPaint()
+                            states: State {
+                               name: "onMouseOver"; when: overMenuArea.containsMouse
+                               PropertyChanges { target: buttonsGrid.itemAt(currentX); buttonText: control.menuItems[styleData.index].text}
                             }*/
+
 
                               onPaint: {
                                   var ctx = getContext("2d");
@@ -466,12 +469,13 @@ Column {
                                   // Draw one section.
                                   ctx.beginPath();
                                   ctx.moveTo(x,y);
+                                  console.log(r);
 
                                   // Canvas draws 0 degrees at 3 o'clock, whereas we want it to draw it at 12.
                                   //var start = control.__protectedScope.sectionStartAngle(section);
                                   //var end = control.__protectedScope.sectionEndAngle(section);
                                   var start = sectionCenterAngle(styleData.index)/2 -
-                                  ctx.arc(x, y, r, -Math.PI * (1/20), Math.PI * (1/20), false);
+                                  ctx.arc(x, y, r*(4/5), -Math.PI * (1/20), Math.PI * (1/20), false);
                                   ctx.fill();
 
                                   // Either change this to the background color, or use the global composition.
@@ -479,7 +483,7 @@ Column {
                                   ctx.globalCompositeOperation = "destination-out";
                                   ctx.beginPath();
                                   ctx.moveTo(x, y);
-                                  ctx.arc(x, y, ringWidth, 0, Math.PI * 2);
+                                  ctx.arc(x, y, ringWidth*(4/5), 0, Math.PI * 2);
                                   ctx.closePath();
                                   ctx.fill();
 
@@ -490,8 +494,8 @@ Column {
                         Item {
                           //anchors.horizontalCenter: parent.horizontalCenter
                           //anchors.verticalCenter: parent.verticalCenter
-                          x: parent.height * (7/8)
-                          y: parent.width * (0.4475)
+                          x: parent.height * (7/8) *(7/8)
+                          y: parent.width * (0.445)
                           Text {
                             id: textItem
                             text: control.menuItems[styleData.index].text
@@ -501,6 +505,7 @@ Column {
                             //rotation: sectionCenterAngle(styleData.index)
                             color: control.currentIndex === styleData.index ? "violet" : "black"
                             rotation: -item.rotation
+                            scale: 0.9
                           }
                         }
 
@@ -549,6 +554,14 @@ Column {
                     MenuItem {
                         text: "1"
                         onTriggered:dialogue.pressButton(1)
+                        /*MouseArea {
+                          anchors.fill: parent
+                          hoverEnabled: true
+                          containsMouse: {
+                            buttonsGrid.itemAt(currentX).buttonText = styleData.text
+                            buttonsGrid.itemAt(currentX).hinted = false
+                          }
+                        }*/
                     }
                     MenuItem {
                         text: "2"
