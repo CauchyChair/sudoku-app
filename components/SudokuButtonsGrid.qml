@@ -110,6 +110,7 @@ Repeater {
                         var middleX = currentLeft + LeftDelta
                         var middleY = currentTop + TopDelta
                         dialogue.popup(middleX, middleY)
+                        console.log(middle)
 
                     }
 
